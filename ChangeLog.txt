@@ -1,3 +1,7 @@
+Broker:
+- Fix $SYS messages being expired after 60 seconds and hence unchanged values
+  disappearing.
+
 2.0.15 - 2022-08-16
 ===================
 
