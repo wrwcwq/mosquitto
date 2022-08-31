@@ -217,7 +217,7 @@ void sys_tree__update(int interval, time_t start_time)
 
 	if(interval && db.now_s - interval > last_update){
 		uptime = db.now_s - start_time;
-		len = (uint32_t)snprintf(buf, BUFLEN, "%d seconds", (int)uptime);
+		len = (uint32_t)snprintf(buf, BUFLEN, "%" PRIu64 " seconds", (uint64_t)uptime);
 		db__messages_easy_queue(NULL, "$SYS/broker/uptime", SYS_TREE_QOS, len, buf, 1, 0, NULL);
 
 		sys_tree__update_clients(buf);
