@@ -1248,7 +1248,7 @@ int mosquitto_property_copy_all(mosquitto_property **dest, const mosquitto_prope
 			case MQTT_PROP_SERVER_REFERENCE:
 			case MQTT_PROP_REASON_STRING:
 				pnew->value.s.len = src->value.s.len;
-				pnew->value.s.v = strdup(src->value.s.v);
+				pnew->value.s.v = src->value.s.v ? strdup(src->value.s.v) : (char*)calloc(1,1);
 				if(!pnew->value.s.v){
 					mosquitto_property_free_all(dest);
 					return MOSQ_ERR_NOMEM;
@@ -1268,14 +1268,14 @@ int mosquitto_property_copy_all(mosquitto_property **dest, const mosquitto_prope
 
 			case MQTT_PROP_USER_PROPERTY:
 				pnew->value.s.len = src->value.s.len;
-				pnew->value.s.v = strdup(src->value.s.v);
+				pnew->value.s.v = src->value.s.v ? strdup(src->value.s.v) : (char*)calloc(1,1);
 				if(!pnew->value.s.v){
 					mosquitto_property_free_all(dest);
 					return MOSQ_ERR_NOMEM;
 				}
 
 				pnew->name.len = src->name.len;
-				pnew->name.v = strdup(src->name.v);
+				pnew->name.v = src->name.v ? strdup(src->name.v) : (char*)calloc(1,1);
 				if(!pnew->name.v){
 					mosquitto_property_free_all(dest);
 					return MOSQ_ERR_NOMEM;
