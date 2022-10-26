@@ -22,6 +22,8 @@ Contributors:
 #include "config.h"
 
 #include <ctype.h>
+#include <errno.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,8 +35,10 @@ Contributors:
 #  include <io.h>
 #  include <lmcons.h>
 #  include <fcntl.h>
+#  define PATH_MAX MAX_PATH
 #else
 #  include <sys/stat.h>
+#  include <unistd.h>
 #endif
 
 #include "misc_mosq.h"
@@ -126,30 +130,33 @@ FILE *mosquitto__fopen(const char *path, const char *mode, bool restrict_read)
 		}
 	}
 #else
-	if(mode[0] == 'r'){
-		struct stat statbuf;
-		if(stat(path, &statbuf) < 0){
-			return NULL;
-		}
-
-		if(!S_ISREG(statbuf.st_mode) && !S_ISLNK(statbuf.st_mode)){
-			log__printf(NULL, MOSQ_LOG_ERR, "Error: %s is not a file.", path);
-			return NULL;
-		}
-	}
+	FILE *fptr;
+	struct stat statbuf;
 
 	if (restrict_read) {
-		FILE *fptr;
 		mode_t old_mask;
 
 		old_mask = umask(0077);
 		fptr = fopen(path, mode);
 		umask(old_mask);
-
-		return fptr;
 	}else{
-		return fopen(path, mode);
+		fptr = fopen(path, mode);
 	}
+	if(!fptr) return NULL;
+
+	if(fstat(fileno(fptr), &statbuf) < 0){
+		fclose(fptr);
+		return NULL;
+	}
+
+	if(!S_ISREG(statbuf.st_mode) && !S_ISLNK(statbuf.st_mode)){
+#ifdef WITH_BROKER
+		log__printf(NULL, MOSQ_LOG_ERR, "Error: %s is not a file.", path);
+#endif
+		fclose(fptr);
+		return NULL;
+	}
+	return fptr;
 #endif
 }
 
