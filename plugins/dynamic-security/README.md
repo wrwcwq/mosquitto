@@ -61,7 +61,7 @@ Command:
 {
 	"commands":[
 		{
-			"command": "getDefaultACLAccess",
+			"command": "getDefaultACLAccess"
 		}
 	]
 }
@@ -523,7 +523,7 @@ Command:
 {
 	"commands":[
 		{
-			"command": "getAnonymousGroup",
+			"command": "getAnonymousGroup"
 		}
 	]
 }
