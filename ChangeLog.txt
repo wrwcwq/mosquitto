@@ -1,6 +1,7 @@
 Broker:
 - Fix $SYS messages being expired after 60 seconds and hence unchanged values
   disappearing.
+- Fix some retained topic memory not being cleared immediately after used.
 
 2.0.15 - 2022-08-16
 ===================
