@@ -2,6 +2,7 @@ Broker:
 - Fix $SYS messages being expired after 60 seconds and hence unchanged values
   disappearing.
 - Fix some retained topic memory not being cleared immediately after used.
+- Fix error handling related to the `bind_interface` option.
 
 2.0.15 - 2022-08-16
 ===================
