@@ -20,6 +20,7 @@ Contributors:
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
 #ifndef WIN32
 #include <syslog.h>
 #endif
