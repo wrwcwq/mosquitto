@@ -6,6 +6,10 @@ Broker:
 - Fix std* files not being redirected when daemonising, when built with
   assertions removed. Closes #2708.
 
+Clients:
+- Fix incorrect topic-alias property value in mosquitto_sub json output.
+
+
 2.0.15 - 2022-08-16
 ===================
 
