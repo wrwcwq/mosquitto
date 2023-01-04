@@ -770,6 +770,7 @@ static int net__socket_listen_tcp(struct mosquitto__listener *listener)
 				COMPAT_CLOSE(sock);
 				listener->sock_count--;
 				if(rc == MOSQ_ERR_NOT_FOUND || rc == MOSQ_ERR_INVAL){
+					freeaddrinfo(ainfo);
 					return rc;
 				}else{
 					continue;
