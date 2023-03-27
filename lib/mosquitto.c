@@ -61,8 +61,11 @@ int mosquitto_lib_init(void)
 		srand((unsigned int)GetTickCount64());
 #elif _POSIX_TIMERS>0 && defined(_POSIX_MONOTONIC_CLOCK)
 		struct timespec tp;
-
+#ifdef CLOCK_BOOTTIME
+		clock_gettime(CLOCK_BOOTTIME, &tp);
+#else
 		clock_gettime(CLOCK_MONOTONIC, &tp);
+#endif
 		srand((unsigned int)tp.tv_nsec);
 #elif defined(__APPLE__)
 		uint64_t ticks;
