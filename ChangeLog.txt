@@ -5,11 +5,13 @@ Broker:
 - Fix error handling related to the `bind_interface` option.
 - Fix std* files not being redirected when daemonising, when built with
   assertions removed. Closes #2708.
+- Fix default settings incorrectly allowing TLS v1.1. Closes #2722.
 
 Client library:
 - Use CLOCK_BOOTTIME when available, to keep track of time. This solves the
   problem of the client OS sleeping and the client hence not being able to
   calculate the actual time for keepalive purposes. Closes #2760.
+- Fix default settings incorrectly allowing TLS v1.1. Closes #2722.
 
 Clients:
 - Fix incorrect topic-alias property value in mosquitto_sub json output.
