@@ -479,7 +479,7 @@ int net__load_certificates(struct mosquitto__listener *listener)
 		net__print_ssl_error(NULL);
 		return MOSQ_ERR_TLS;
 	}
-	if(listener->tls_engine == NULL){
+	if(listener->tls_engine == NULL || listener->tls_keyform == mosq_k_pem){
 		rc = SSL_CTX_use_PrivateKey_file(listener->ssl_ctx, listener->keyfile, SSL_FILETYPE_PEM);
 		if(rc != 1){
 			log__printf(NULL, MOSQ_LOG_ERR, "Error: Unable to load server key file \"%s\". Check keyfile.", listener->keyfile);
