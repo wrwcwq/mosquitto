@@ -451,8 +451,8 @@ void dynsec__config_save(void)
 	json_str_len = strlen(json_str);
 
 	/* Save to file */
-	file_path_len = strlen(config_file) + 1;
-	file_path = mosquitto_malloc(file_path_len + 4);
+	file_path_len = strlen(config_file) + strlen(".new") + 1;
+	file_path = mosquitto_malloc(file_path_len);
 	if(file_path == NULL){
 		mosquitto_free(json_str);
 		mosquitto_log_printf(MOSQ_LOG_ERR, "Error saving Dynamic security plugin config: Out of memory.\n");
