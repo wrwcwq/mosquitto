@@ -6,6 +6,7 @@ Broker:
 - Fix std* files not being redirected when daemonising, when built with
   assertions removed. Closes #2708.
 - Fix default settings incorrectly allowing TLS v1.1. Closes #2722.
+- Use line buffered mode for stdout. Closes #2354. Closes #2749.
 
 Client library:
 - Use CLOCK_BOOTTIME when available, to keep track of time. This solves the
