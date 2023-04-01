@@ -15,6 +15,7 @@ Client library:
 
 Clients:
 - Fix incorrect topic-alias property value in mosquitto_sub json output.
+- Fix confusing message on TLS certificate verification. Closes #2746.
 
 
 2.0.15 - 2022-08-16

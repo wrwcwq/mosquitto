@@ -268,6 +268,8 @@ int packet__write(struct mosquitto *mosq)
 							return MOSQ_ERR_CONN_LOST;
 						case COMPAT_EINTR:
 							return MOSQ_ERR_SUCCESS;
+						case EPROTO:
+							return MOSQ_ERR_TLS;
 						default:
 							return MOSQ_ERR_ERRNO;
 					}
