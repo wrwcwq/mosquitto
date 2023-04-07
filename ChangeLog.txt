@@ -7,6 +7,8 @@ Broker:
   assertions removed. Closes #2708.
 - Fix default settings incorrectly allowing TLS v1.1. Closes #2722.
 - Use line buffered mode for stdout. Closes #2354. Closes #2749.
+- Fix connections being limited to 2048 on Windows. The limit is now 8192,
+  where supported. Closes #2732.
 
 Client library:
 - Use CLOCK_BOOTTIME when available, to keep track of time. This solves the
