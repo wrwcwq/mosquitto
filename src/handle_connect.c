@@ -946,7 +946,13 @@ handle_connect_error:
 		mosquitto__free(will_struct->msg.topic);
 		mosquitto__free(will_struct);
 	}
-	context->will = NULL;
+	if(context->will){
+		mosquitto_property_free_all(&context->will->properties);
+		mosquitto__free(context->will->msg.payload);
+		mosquitto__free(context->will->msg.topic);
+		mosquitto__free(context->will);
+		context->will = NULL;
+	}
 #ifdef WITH_TLS
 	if(client_cert) X509_free(client_cert);
 #endif
