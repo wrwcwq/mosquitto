@@ -17,6 +17,7 @@ Client library:
   problem of the client OS sleeping and the client hence not being able to
   calculate the actual time for keepalive purposes. Closes #2760.
 - Fix default settings incorrectly allowing TLS v1.1. Closes #2722.
+- Fix high CPU use on slow TLS connect. Closes #2794.
 
 Clients:
 - Fix incorrect topic-alias property value in mosquitto_sub json output.

@@ -332,18 +332,7 @@ int mosquitto_socket(struct mosquitto *mosq)
 
 bool mosquitto_want_write(struct mosquitto *mosq)
 {
-	bool result = false;
-	if(mosq->out_packet || mosq->current_out_packet){
-		result = true;
-	}
-#ifdef WITH_TLS
-	if(mosq->ssl){
-		if (mosq->want_write) {
-			result = true;
-		}
-	}
-#endif
-	return result;
+	return mosq->out_packet || mosq->current_out_packet || mosq->want_write;
 }
 
 
