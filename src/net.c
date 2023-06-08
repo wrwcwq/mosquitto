@@ -296,6 +296,10 @@ static unsigned int psk_server_callback(SSL *ssl, const char *identity, unsigned
 	}
 
 	if(listener->use_identity_as_username){
+		if(mosquitto_validate_utf8(identity, (int)strlen(identity))){
+			mosquitto__free(psk_key);
+			return 0;
+		}
 		context->username = mosquitto__strdup(identity);
 		if(!context->username){
 			mosquitto__free(psk_key);
