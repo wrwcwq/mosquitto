@@ -20,6 +20,7 @@ Broker:
   if the owner/group is not the same as the user/group the broker is running
   as. In future versions the broker will refuse to open these files.
 - mosquitto_memcmp_const is now more constant time.
+- Only register with DLT if DLT logging is enabled.
 
 Client library:
 - Use CLOCK_BOOTTIME when available, to keep track of time. This solves the

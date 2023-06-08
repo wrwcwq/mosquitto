@@ -134,10 +134,12 @@ int log__init(struct mosquitto__config *config)
 		setlinebuf(stdout);
 	}
 #ifdef WITH_DLT
-	dlt_fifo_check();
-	if(dlt_allowed){
-		DLT_REGISTER_APP("MQTT","mosquitto log");
-		dlt_register_context(&dltContext, "MQTT", "mosquitto DLT context");
+	if(log_destinations & MQTT3_LOG_DLT){
+		dlt_fifo_check();
+		if(dlt_allowed){
+			DLT_REGISTER_APP("MQTT","mosquitto log");
+			dlt_register_context(&dltContext, "MQTT", "mosquitto DLT context");
+		}
 	}
 #endif
 	return rc;
