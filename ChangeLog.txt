@@ -29,6 +29,9 @@ Clients:
 - Fix incorrect topic-alias property value in mosquitto_sub json output.
 - Fix confusing message on TLS certificate verification. Closes #2746.
 
+Apps:
+- mosquitto_passwd uses mkstemp() for backup files.
+
 
 2.0.15 - 2022-08-16
 ===================
