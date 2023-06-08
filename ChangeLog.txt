@@ -1,3 +1,6 @@
+Security:
+- Broker will reject Will messages that attempt to publish to $CONTROL/.
+
 Broker:
 - Fix $SYS messages being expired after 60 seconds and hence unchanged values
   disappearing.

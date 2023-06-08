@@ -375,6 +375,10 @@ static int will__read(struct mosquitto *context, const char *client_id, struct m
 		will_struct->msg.topic = will_topic_mount;
 	}
 
+	if(!strncmp(will_struct->msg.topic, "$CONTROL/", strlen("$CONTROL/"))){
+		rc = MOSQ_ERR_ACL_DENIED;
+		goto error_cleanup;
+	}
 	rc = mosquitto_pub_topic_check(will_struct->msg.topic);
 	if(rc) goto error_cleanup;
 
