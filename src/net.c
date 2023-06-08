@@ -56,6 +56,7 @@ Contributors:
 #include "mosquitto_broker_internal.h"
 #include "mqtt_protocol.h"
 #include "memory_mosq.h"
+#include "misc_mosq.h"
 #include "net_mosq.h"
 #include "util_mosq.h"
 
@@ -416,7 +417,7 @@ int net__tls_server_ctx(struct mosquitto__listener *listener)
 #endif
 
 	if(listener->dhparamfile){
-		dhparamfile = fopen(listener->dhparamfile, "r");
+		dhparamfile = mosquitto__fopen(listener->dhparamfile, "r", true);
 		if(!dhparamfile){
 			log__printf(NULL, MOSQ_LOG_ERR, "Error loading dhparamfile \"%s\".", listener->dhparamfile);
 			return MOSQ_ERR_TLS;

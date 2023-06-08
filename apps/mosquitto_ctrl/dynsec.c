@@ -30,6 +30,7 @@ Contributors:
 #include "mosquitto.h"
 #include "password_mosq.h"
 #include "get_password.h"
+#include "misc_mosq.h"
 
 void dynsec__print_usage(void)
 {
@@ -738,7 +739,7 @@ static int dynsec_init(int argc, char *argv[])
 		admin_password = password;
 	}
 
-	fptr = fopen(filename, "rb");
+	fptr = mosquitto__fopen(filename, "rb", true);
 	if(fptr){
 		fclose(fptr);
 		fprintf(stderr, "dynsec init: '%s' already exists. Remove the file or use a different location..\n", filename);
@@ -753,7 +754,7 @@ static int dynsec_init(int argc, char *argv[])
 	json_str = cJSON_Print(tree);
 	cJSON_Delete(tree);
 
-	fptr = fopen(filename, "wb");
+	fptr = mosquitto__fopen(filename, "wb", true);
 	if(fptr){
 		fprintf(fptr, "%s", json_str);
 		free(json_str);

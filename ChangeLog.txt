@@ -11,6 +11,9 @@ Broker:
   on start after restoring from persistence. Closes #2634.
 - Fix connections being limited to 2048 on Windows. The limit is now 8192,
   where supported. Closes #2732.
+- Broker will log warnings if sensitive files are world readable/writable, or
+  if the owner/group is not the same as the user/group the broker is running
+  as. In future versions the broker will refuse to open these files.
 
 Client library:
 - Use CLOCK_BOOTTIME when available, to keep track of time. This solves the

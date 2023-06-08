@@ -374,7 +374,7 @@ static int create_backup(const char *backup_file, FILE *fptr)
 {
 	FILE *fbackup;
 
-	fbackup = fopen(backup_file, "wt");
+	fbackup = mosquitto__fopen(backup_file, "wt", true);
 	if(!fbackup){
 		fprintf(stderr, "Error creating backup password file \"%s\", not continuing.\n", backup_file);
 		return 1;
@@ -599,7 +599,7 @@ int main(int argc, char *argv[])
 			}
 			password_cmd = password;
 		}
-		fptr = fopen(password_file, "wt");
+		fptr = mosquitto__fopen(password_file, "wt", true);
 		if(!fptr){
 			fprintf(stderr, "Error: Unable to open file %s for writing. %s.\n", password_file, strerror(errno));
 			free(password_file);
@@ -610,7 +610,7 @@ int main(int argc, char *argv[])
 		fclose(fptr);
 		return rc;
 	}else{
-		fptr = fopen(password_file, "r+t");
+		fptr = mosquitto__fopen(password_file, "r+t", true);
 		if(!fptr){
 			fprintf(stderr, "Error: Unable to open password file %s. %s.\n", password_file, strerror(errno));
 			free(password_file);

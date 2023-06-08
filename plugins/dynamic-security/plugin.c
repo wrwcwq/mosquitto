@@ -41,6 +41,190 @@ static mosquitto_plugin_id_t *plg_id = NULL;
 static char *config_file = NULL;
 struct dynsec__acl_default_access default_access = {false, false, false, false};
 
+#ifdef WIN32
+#  include <winsock2.h>
+#  include <aclapi.h>
+#  include <io.h>
+#  include <lmcons.h>
+#  include <fcntl.h>
+#  define PATH_MAX MAX_PATH
+#else
+#  include <sys/stat.h>
+#  include <pwd.h>
+#  include <grp.h>
+#  include <unistd.h>
+#endif
+/* Temporary - remove in 2.1 */
+FILE *mosquitto__fopen(const char *path, const char *mode, bool restrict_read)
+{
+#ifdef WIN32
+	char buf[4096];
+	int rc;
+	int flags = 0;
+
+	rc = ExpandEnvironmentStringsA(path, buf, 4096);
+	if(rc == 0 || rc > 4096){
+		return NULL;
+	}else{
+		if (restrict_read) {
+			HANDLE hfile;
+			SECURITY_ATTRIBUTES sec;
+			EXPLICIT_ACCESS_A ea;
+			PACL pacl = NULL;
+			char username[UNLEN + 1];
+			DWORD ulen = UNLEN;
+			SECURITY_DESCRIPTOR sd;
+			DWORD dwCreationDisposition;
+			int fd;
+			FILE *fptr;
+
+			switch(mode[0]){
+				case 'a':
+					dwCreationDisposition = OPEN_ALWAYS;
+					flags = _O_APPEND;
+					break;
+				case 'r':
+					dwCreationDisposition = OPEN_EXISTING;
+					flags = _O_RDONLY;
+					break;
+				case 'w':
+					dwCreationDisposition = CREATE_ALWAYS;
+					break;
+				default:
+					return NULL;
+			}
+
+			GetUserNameA(username, &ulen);
+			if (!InitializeSecurityDescriptor(&sd, SECURITY_DESCRIPTOR_REVISION)) {
+				return NULL;
+			}
+			BuildExplicitAccessWithNameA(&ea, username, GENERIC_ALL, SET_ACCESS, NO_INHERITANCE);
+			if (SetEntriesInAclA(1, &ea, NULL, &pacl) != ERROR_SUCCESS) {
+				return NULL;
+			}
+			if (!SetSecurityDescriptorDacl(&sd, TRUE, pacl, FALSE)) {
+				LocalFree(pacl);
+				return NULL;
+			}
+
+			memset(&sec, 0, sizeof(sec));
+			sec.nLength = sizeof(SECURITY_ATTRIBUTES);
+			sec.bInheritHandle = FALSE;
+			sec.lpSecurityDescriptor = &sd;
+
+			hfile = CreateFileA(buf, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ,
+				&sec,
+				dwCreationDisposition,
+				FILE_ATTRIBUTE_NORMAL,
+				NULL);
+
+			LocalFree(pacl);
+
+			fd = _open_osfhandle((intptr_t)hfile, flags);
+			if (fd < 0) {
+				return NULL;
+			}
+
+			fptr = _fdopen(fd, mode);
+			if (!fptr) {
+				_close(fd);
+				return NULL;
+			}
+			if(mode[0] == 'a'){
+				fseek(fptr, 0, SEEK_END);
+			}
+			return fptr;
+
+		}else {
+			return fopen(buf, mode);
+		}
+	}
+#else
+	FILE *fptr;
+	struct stat statbuf;
+
+	if (restrict_read) {
+		mode_t old_mask;
+
+		old_mask = umask(0077);
+		fptr = fopen(path, mode);
+		umask(old_mask);
+	}else{
+		fptr = fopen(path, mode);
+	}
+	if(!fptr) return NULL;
+
+	if(fstat(fileno(fptr), &statbuf) < 0){
+		fclose(fptr);
+		return NULL;
+	}
+
+	if(restrict_read){
+		if(statbuf.st_mode & S_IRWXO){
+#ifdef WITH_BROKER
+			log__printf(NULL, MOSQ_LOG_WARNING,
+#else
+			fprintf(stderr,
+#endif
+					"Warning: File %s has world readable permissions. Future versions will refuse to load this file.",
+					path);
+#if 0
+			return NULL;
+#endif
+		}
+		if(statbuf.st_uid != getuid()){
+			char buf[4096];
+			struct passwd pw, *result;
+
+			getpwuid_r(getuid(), &pw, buf, sizeof(buf), &result);
+			if(result){
+#ifdef WITH_BROKER
+				log__printf(NULL, MOSQ_LOG_WARNING,
+#else
+				fprintf(stderr,
+#endif
+						"Warning: File %s owner is not %s. Future versions will refuse to load this file.",
+						path, result->pw_name);
+			}
+#if 0
+			// Future version
+			return NULL;
+#endif
+		}
+		if(statbuf.st_gid != getgid()){
+			char buf[4096];
+			struct group grp, *result;
+
+			getgrgid_r(getgid(), &grp, buf, sizeof(buf), &result);
+			if(result){
+#ifdef WITH_BROKER
+				log__printf(NULL, MOSQ_LOG_WARNING,
+#else
+				fprintf(stderr,
+#endif
+						"Warning: File %s group is not %s. Future versions will refuse to load this file.",
+						path, result->gr_name);
+			}
+#if 0
+			// Future version
+			return NULL
+#endif
+		}
+	}
+
+
+	if(!S_ISREG(statbuf.st_mode) && !S_ISLNK(statbuf.st_mode)){
+#ifdef WITH_BROKER
+		log__printf(NULL, MOSQ_LOG_ERR, "Error: %s is not a file.", path);
+#endif
+		fclose(fptr);
+		return NULL;
+	}
+	return fptr;
+#endif
+}
+
+
 void dynsec__command_reply(cJSON *j_responses, struct mosquitto *context, const char *command, const char *error, const char *correlation_data)
 {
 	cJSON *j_response;
@@ -359,7 +543,7 @@ static int dynsec__config_load(void)
 
 	/* Load from file */
 	errno = 0;
-	fptr = fopen(config_file, "rb");
+	fptr = mosquitto__fopen(config_file, "rb", true);
 	if(fptr == NULL){
 		mosquitto_log_printf(MOSQ_LOG_ERR, "Error loading Dynamic security plugin config: File is not readable - check permissions.\n");
 		return MOSQ_ERR_ERRNO;
@@ -460,7 +644,7 @@ void dynsec__config_save(void)
 	}
 	snprintf(file_path, file_path_len, "%s.new", config_file);
 
-	fptr = fopen(file_path, "wt");
+	fptr = mosquitto__fopen(file_path, "wt", true);
 	if(fptr == NULL){
 		mosquitto_free(json_str);
 		mosquitto_free(file_path);
