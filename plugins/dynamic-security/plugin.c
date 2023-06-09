@@ -476,37 +476,14 @@ int mosquitto_plugin_version(int supported_version_count, const int *supported_v
 
 static int dynsec__general_config_load(cJSON *tree)
 {
-	cJSON *j_default_access, *jtmp;
+	cJSON *j_default_access;
 
 	j_default_access = cJSON_GetObjectItem(tree, "defaultACLAccess");
 	if(j_default_access && cJSON_IsObject(j_default_access)){
-		jtmp = cJSON_GetObjectItem(j_default_access, ACL_TYPE_PUB_C_SEND);
-		if(jtmp && cJSON_IsBool(jtmp)){
-			default_access.publish_c_send = cJSON_IsTrue(jtmp);
-		}else{
-			default_access.publish_c_send = false;
-		}
-
-		jtmp = cJSON_GetObjectItem(j_default_access, ACL_TYPE_PUB_C_RECV);
-		if(jtmp && cJSON_IsBool(jtmp)){
-			default_access.publish_c_recv = cJSON_IsTrue(jtmp);
-		}else{
-			default_access.publish_c_recv = false;
-		}
-
-		jtmp = cJSON_GetObjectItem(j_default_access, ACL_TYPE_SUB_GENERIC);
-		if(jtmp && cJSON_IsBool(jtmp)){
-			default_access.subscribe = cJSON_IsTrue(jtmp);
-		}else{
-			default_access.subscribe = false;
-		}
-
-		jtmp = cJSON_GetObjectItem(j_default_access, ACL_TYPE_UNSUB_GENERIC);
-		if(jtmp && cJSON_IsBool(jtmp)){
-			default_access.unsubscribe = cJSON_IsTrue(jtmp);
-		}else{
-			default_access.unsubscribe = false;
-		}
+		json_get_bool(j_default_access, ACL_TYPE_PUB_C_SEND, &default_access.publish_c_send, true, false);
+		json_get_bool(j_default_access, ACL_TYPE_PUB_C_RECV, &default_access.publish_c_recv, true, false);
+		json_get_bool(j_default_access, ACL_TYPE_SUB_GENERIC, &default_access.subscribe, true, false);
+		json_get_bool(j_default_access, ACL_TYPE_UNSUB_GENERIC, &default_access.unsubscribe, true, false);
 	}
 	return MOSQ_ERR_SUCCESS;
 }
