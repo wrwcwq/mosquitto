@@ -321,8 +321,7 @@ static int dynsec_control_callback(int event, void *event_data, void *userdata)
 
 static int dynsec__process_set_default_acl_access(cJSON *j_responses, struct mosquitto *context, cJSON *command, char *correlation_data)
 {
-	cJSON *j_actions, *j_action, *j_acltype, *j_allow;
-	bool allow;
+	cJSON *j_actions, *j_action;
 	const char *admin_clientid, *admin_username;
 
 	j_actions = cJSON_GetObjectItem(command, "acls");
@@ -335,24 +334,23 @@ static int dynsec__process_set_default_acl_access(cJSON *j_responses, struct mos
 	admin_username = mosquitto_client_username(context);
 
 	cJSON_ArrayForEach(j_action, j_actions){
-		j_acltype = cJSON_GetObjectItem(j_action, "acltype");
-		j_allow = cJSON_GetObjectItem(j_action, "allow");
-		if(j_acltype && cJSON_IsString(j_acltype)
-					&& j_allow && cJSON_IsBool(j_allow)){
+		char *acltype;
+		bool allow;
 
-			allow = cJSON_IsTrue(j_allow);
+		if(json_get_string(j_action, "acltype", &acltype, false) == MOSQ_ERR_SUCCESS
+				&& json_get_bool(j_action, "allow", &allow, false, false) == MOSQ_ERR_SUCCESS){
 
-			if(!strcasecmp(j_acltype->valuestring, ACL_TYPE_PUB_C_SEND)){
+			if(!strcasecmp(acltype, ACL_TYPE_PUB_C_SEND)){
 				default_access.publish_c_send = allow;
-			}else if(!strcasecmp(j_acltype->valuestring, ACL_TYPE_PUB_C_RECV)){
+			}else if(!strcasecmp(acltype, ACL_TYPE_PUB_C_RECV)){
 				default_access.publish_c_recv = allow;
-			}else if(!strcasecmp(j_acltype->valuestring, ACL_TYPE_SUB_GENERIC)){
+			}else if(!strcasecmp(acltype, ACL_TYPE_SUB_GENERIC)){
 				default_access.subscribe = allow;
-			}else if(!strcasecmp(j_acltype->valuestring, ACL_TYPE_UNSUB_GENERIC)){
+			}else if(!strcasecmp(acltype, ACL_TYPE_UNSUB_GENERIC)){
 				default_access.unsubscribe = allow;
 			}
 			mosquitto_log_printf(MOSQ_LOG_INFO, "dynsec: %s/%s | setDefaultACLAccess | acltype=%s | allow=%s",
-					admin_clientid, admin_username, j_acltype->valuestring, allow?"true":"false");
+					admin_clientid, admin_username, acltype, allow?"true":"false");
 		}
 	}
 

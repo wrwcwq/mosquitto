@@ -25,6 +25,9 @@ Broker:
   as. In future versions the broker will refuse to open these files.
 - mosquitto_memcmp_const is now more constant time.
 - Only register with DLT if DLT logging is enabled.
+- Fix any possible case where a json string might be incorrectly loaded. This
+  could have caused a crash if a textname or textdescription field of a role was
+  not a string, when loading the dynsec config from file only.
 
 Client library:
 - Use CLOCK_BOOTTIME when available, to keep track of time. This solves the
