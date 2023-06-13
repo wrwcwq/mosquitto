@@ -214,16 +214,20 @@ int dynsec_groups__config_load(cJSON *tree)
 
 	cJSON_ArrayForEach(j_group, j_groups){
 		if(cJSON_IsObject(j_group) == true){
+			/* Group name */
+			if(json_get_string(j_group, "groupname", &groupname, false) != MOSQ_ERR_SUCCESS){
+				continue;
+			}
+			group = dynsec_groups__find(groupname);
+			if(group){
+				continue;
+			}
+
 			group = mosquitto_calloc(1, sizeof(struct dynsec__group));
 			if(group == NULL){
 				return MOSQ_ERR_NOMEM;
 			}
 
-			/* Group name */
-			if(json_get_string(j_group, "groupname", &groupname, false) != MOSQ_ERR_SUCCESS){
-				mosquitto_free(group);
-				continue;
-			}
 			group->groupname = strdup(groupname);
 			if(group->groupname == NULL){
 				mosquitto_free(group);

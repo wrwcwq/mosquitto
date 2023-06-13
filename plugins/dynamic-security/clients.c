@@ -124,18 +124,24 @@ int dynsec_clients__config_load(cJSON *tree)
 
 	cJSON_ArrayForEach(j_client, j_clients){
 		if(cJSON_IsObject(j_client) == true){
+			/* Username */
+			char *username;
+			json_get_string(j_client, "username", &username, false);
+			if(!username){
+				continue;
+			}
+
+			client = dynsec_clients__find(username);
+			if(client){
+				continue;
+			}
+
 			client = mosquitto_calloc(1, sizeof(struct dynsec__client));
 			if(client == NULL){
 				return MOSQ_ERR_NOMEM;
 			}
 
-			/* Username */
-			char *username;
-			json_get_string(j_client, "username", &username, false);
-			if(!username){
-				mosquitto_free(client);
-				continue;
-			}
+
 			client->username = mosquitto_strdup(username);
 			if(client->username == NULL){
 				mosquitto_free(client);
