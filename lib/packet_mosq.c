@@ -152,6 +152,21 @@ int packet__queue(struct mosquitto *mosq, struct mosquitto__packet *packet)
 
 	packet->next = NULL;
 	pthread_mutex_lock(&mosq->out_packet_mutex);
+
+#ifdef WITH_BROKER
+	if(mosq->out_packet_count >= db.config->max_queued_messages){
+		mosquitto__free(packet);
+		if(mosq->is_dropping == false){
+			mosq->is_dropping = true;
+			log__printf(NULL, MOSQ_LOG_NOTICE,
+					"Outgoing messages are being dropped for client %s.",
+					mosq->id);
+		}
+		G_MSGS_DROPPED_INC();
+		return MOSQ_ERR_SUCCESS;
+	}
+#endif
+
 	if(mosq->out_packet){
 		mosq->out_packet_last->next = packet;
 	}else{
