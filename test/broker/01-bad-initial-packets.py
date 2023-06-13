@@ -50,7 +50,10 @@ def do_test(port):
         for s in socks:
             s.close()
 
-        limit = 25000000
+        if os.environ.get('MOSQ_USE_VALGRIND') is None:
+            limit = 25000000
+        else:
+            limit = 120000000
         if mem > limit:
             raise mosq_test.TestError(f"Process memory {mem} greater than limit of {limit}")
 
