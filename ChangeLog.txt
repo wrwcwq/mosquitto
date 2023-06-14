@@ -31,6 +31,7 @@ Broker:
   not a string, when loading the dynsec config from file only.
 - Dynsec plugin will not allow duplicate clients/groups/roles when loading
   config from file, which matches the behaviour for when creating them.
+- Fix heap overflow when reading corrupt config with "log_dest file".
 
 Client library:
 - Use CLOCK_BOOTTIME when available, to keep track of time. This solves the
