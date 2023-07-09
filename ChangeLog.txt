@@ -48,6 +48,8 @@ Clients:
 
 Apps:
 - mosquitto_passwd uses mkstemp() for backup files.
+- `mosquitto_ctrl dynsec init` will refuse to overwrite an existing file,
+  without a race-condition.
 
 
 2.0.15 - 2022-08-16
