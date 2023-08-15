@@ -131,7 +131,7 @@ int log__init(struct mosquitto__config *config)
 		}
 	}
 	if(log_destinations & MQTT3_LOG_STDOUT){
-		setlinebuf(stdout);
+		setvbuf(stdout, NULL, _IOLBF, 0);
 	}
 #ifdef WITH_DLT
 	if(log_destinations & MQTT3_LOG_DLT){
