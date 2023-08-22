@@ -5,6 +5,9 @@ Broker:
 - Fix `max_queued_message 0` stopping clients from receiving messages.
   Closes #2879.
 
+Apps:
+- Fix `mosquitto_passwd -U` backup file creation. Closes #2873.
+
 
 2.0.16 - 2023-08-16
 ===================
